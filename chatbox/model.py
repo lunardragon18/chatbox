@@ -62,9 +62,9 @@ class ChatBot:
             temperature=0.6,
             top_p=0.9
         )
-        print("Raw output from model:", output)
+
         output_message = output[0]['generated_text'][-1]
-        return {"content": output_message}
+        return output_message
 
     def load_model(self, model_path):
         bits_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
