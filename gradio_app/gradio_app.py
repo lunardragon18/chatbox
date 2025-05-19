@@ -1,46 +1,27 @@
 import gradio as gr
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from chatbox.model import ChatBot
 from dotenv import load_dotenv
-import os
+
 load_dotenv()
 
+def chat_function(message, history):
+    chatbox = ChatBot(
+            "Vovia/chatbot",
+            huggingface_token=os.getenv("HUGGINGFACE_TOKEN")
+        )
 
-options = ["Naruto", "Sauske", "Sakura"]
-def chatbot_interface(name):
-    character_chatbox = ChatBot("Vovia/chatbot",
-                                name=name,
-                                huggingface_token=os.getenv('HUGGINGFACE_TOKEN'),
-                                )
-    def chatboxes(message,history):
-        output = character_chatbox.chatting(message,history)
-        output = output['content'].strip()
-        return output
-
-    return chatboxes
-
-
-
-
+    output = chatbox.chatting(message, history)
+    return output['content'].strip()
 
 def main():
     with gr.Blocks() as demo:
-        with gr.Row():
-            with gr.Column():
-                gr.HTML("<h1>Character ChatBot</h1>")
-                gr.Markdown("### Please choose one option:")
-                choice = gr.Radio(choices=options, label="Select a character", type="value", value="Naruto")
-                start_button = gr.Button("Start Chat")
-                chatbot_ui = gr.ChatInterface(fn=None, visible=False)
+        gr.HTML("<h1>Character ChatBot</h1>")
+        gr.ChatInterface(chat_function)
 
-                def start_chat(character):
-                    chatbot_fn = chatbot_interface(character)
-                    chatbot_ui.fn = chatbot_fn
-                    chatbot_ui.visible = True
-                    return gr.update(visible=True)
-
-                start_button.click(fn=start_chat, inputs=choice, outputs=chatbot_ui)
-
-    demo.launch()
+    demo.launch(share=True)
 
 if __name__ == "__main__":
     main()
